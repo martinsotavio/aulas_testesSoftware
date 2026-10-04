@@ -1,0 +1,31 @@
+:root { --tinta: #1c2430; --suave: #5b6675; --linha: #d9dee5; --fundo: #f5f6f8; --marca: #1f5f8b; }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, "Segoe UI", sans-serif; color: var(--tinta); background: var(--fundo); }
+header { display: flex; gap: 2rem; align-items: center; padding: .9rem 1.5rem; background: var(--marca); color: #fff; }
+header nav { display: flex; gap: 1.2rem; flex: 1; }
+header a, header button.link { color: #fff; }
+main { max-width: 68rem; margin: 1.5rem auto; padding: 0 1.5rem; }
+h1 { font-size: 1.4rem; }
+h2 { font-size: 1.1rem; margin-top: 2rem; }
+table { width: 100%; border-collapse: collapse; background: #fff; }
+th, td { padding: .55rem .7rem; border-bottom: 1px solid var(--linha); text-align: left; }
+th { font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; color: var(--suave); }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+.acoes { display: flex; gap: .8rem; align-items: center; }
+.acoes form { margin: 0; }
+button.link { background: none; border: 0; padding: 0; color: var(--marca); text-decoration: underline; cursor: pointer; font: inherit; }
+.status { padding: .1rem .5rem; border-radius: 1rem; font-size: .85rem; background: #e6ebf1; }
+.status.quitado { background: #d7f0df; }
+.status.parcial { background: #fdf0c8; }
+.status.cancelado { background: #f3d9d9; }
+.formulario { display: grid; gap: .4rem; max-width: 26rem; background: #fff; padding: 1.2rem; border: 1px solid var(--linha); }
+.formulario label { font-size: .9rem; color: var(--suave); margin-top: .5rem; }
+.formulario input, .formulario select { padding: .5rem; border: 1px solid var(--linha); font: inherit; }
+.formulario button { margin-top: 1rem; padding: .6rem; background: var(--marca); color: #fff; border: 0; font: inherit; cursor: pointer; }
+.aviso { padding: .7rem 1rem; border-left: 4px solid; background: #fff; }
+.aviso.erro { border-color: #b3261e; }
+.aviso.sucesso { border-color: #2e7d4f; }
+.resumo { display: grid; grid-template-columns: max-content 1fr; gap: .3rem 1.2rem; }
+.resumo dt { color: var(--suave); }
+.resumo dd { margin: 0; }
+.total { font-size: 1.6rem; font-variant-numeric: tabular-nums; }

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}Contas{% endblock %} | Contas a pagar e a receber</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='estilo.css') }}">
+</head>
+<body>
+  <header>
+    <strong>Contas a pagar e a receber</strong>
+    <nav aria-label="Principal">
+      <a href="{{ url_for('listar_titulos') }}">Títulos</a>
+      <a href="{{ url_for('formulario_titulo') }}">Novo título</a>
+    </nav>
+  </header>
+  <main>
+    {% for categoria, mensagem in get_flashed_messages(with_categories=true) %}
+      <p class="aviso {{ categoria }}" role="{{ 'alert' if categoria == 'erro' else 'status' }}">{{ mensagem }}</p>
+    {% endfor %}
+    {% block conteudo %}{% endblock %}
+  </main>
+</body>
+</html>

@@ -1,0 +1,51 @@
+# Ambiente padrão da disciplina.
+#   docker compose up -d                        sobe banco e aplicação (http://localhost:8000)
+#   docker compose run --rm testes pytest -v    roda os testes dentro do contêiner
+#   docker compose down -v                      apaga tudo, inclusive os dados
+
+x-ambiente: &ambiente
+  DATABASE_URL: postgresql://contas:contas@db:5432/contas
+  DATABASE_URL_TESTE: postgresql://contas:contas@db:5432/contas_teste
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: contas
+      POSTGRES_PASSWORD: contas
+      POSTGRES_DB: contas
+    ports:
+      - "5433:5432"   # 5433 na máquina, para não brigar com um Postgres já instalado
+    volumes:
+      - dados:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U contas -d contas"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  app:
+    build: .
+    command: sh -c "python migrar.py && flask --app app.web run --host 0.0.0.0 --port 8000 --debug"
+    environment: *ambiente
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/projeto
+    depends_on:
+      db:
+        condition: service_healthy
+
+  testes:
+    build: .
+    profiles: ["testes"]
+    environment: *ambiente
+    volumes:
+      - .:/projeto
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  dados:

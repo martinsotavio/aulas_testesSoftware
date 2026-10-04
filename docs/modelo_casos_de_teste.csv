@@ -1,0 +1,3 @@
+ID;Regra;Pré-condição;Passos;Resultado esperado;Resultado obtido;Passou?
+CT01;5;Nenhuma;Calcular o próximo dia útil de 10/10/2026 (sábado);12/10/2026;12/10/2026;Sim
+CT02;;;;;;

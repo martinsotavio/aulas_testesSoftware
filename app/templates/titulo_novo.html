@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block titulo %}Novo título{% endblock %}
+{% block conteudo %}
+<h1>Novo título</h1>
+<form method="post" class="formulario">
+  <label for="tipo">Tipo</label>
+  <select id="tipo" name="tipo">
+    <option value="pagar" {{ "selected" if dados.get("tipo") == "pagar" }}>A pagar</option>
+    <option value="receber" {{ "selected" if dados.get("tipo") == "receber" }}>A receber</option>
+  </select>
+
+  <label for="descricao">Descrição</label>
+  <input id="descricao" name="descricao" value="{{ dados.get('descricao', '') }}">
+
+  <label for="pessoa">Pessoa (fornecedor ou cliente)</label>
+  <input id="pessoa" name="pessoa" value="{{ dados.get('pessoa', '') }}">
+
+  <label for="valor">Valor</label>
+  <input id="valor" name="valor" inputmode="decimal" placeholder="0,00" value="{{ dados.get('valor', '') }}">
+
+  <label for="vencimento">Vencimento</label>
+  <input id="vencimento" name="vencimento" type="date" value="{{ dados.get('vencimento', '') }}">
+
+  <label for="parcelas">Parcelas</label>
+  <input id="parcelas" name="parcelas" type="number" value="{{ dados.get('parcelas', '1') }}">
+
+  <button type="submit">Salvar</button>
+</form>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block titulo %}Títulos{% endblock %}
+{% block conteudo %}
+<h1>Títulos</h1>
+{% if titulos %}
+<table>
+  <thead>
+    <tr>
+      <th>Nº</th><th>Tipo</th><th>Descrição</th><th>Pessoa</th>
+      <th>Vencimento</th><th class="num">Valor</th><th class="num">Saldo</th><th>Status</th><th>Ações</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for t in titulos %}
+    <tr data-titulo-id="{{ t.id }}">
+      <td>{{ t.id }}</td>
+      <td>{{ "A pagar" if t.tipo == "pagar" else "A receber" }}</td>
+      <td>{{ t.descricao }}</td>
+      <td>{{ t.pessoa }}</td>
+      <td>{{ t.vencimento.strftime("%d/%m/%Y") }}</td>
+      <td class="num">{{ "%.2f"|format(t.valor) }}</td>
+      <td class="num" data-campo="saldo">{{ "%.2f"|format(t.saldo) }}</td>
+      <td><span class="status {{ t.status }}" data-campo="status">{{ t.status }}</span></td>
+      <td class="acoes">
+        <a href="{{ url_for('formulario_baixa', titulo_id=t.id) }}">Baixar</a>
+        <form method="post" action="{{ url_for('cancelar_titulo', titulo_id=t.id) }}">
+          <button type="submit" class="link">Cancelar</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>Nenhum título cadastrado.</p>
+{% endif %}
+{% endblock %}

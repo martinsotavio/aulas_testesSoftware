@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block titulo %}Baixa{% endblock %}
+{% block conteudo %}
+<h1>Baixa do título nº {{ titulo.id }}</h1>
+<dl class="resumo">
+  <dt>Descrição</dt><dd>{{ titulo.descricao }}</dd>
+  <dt>Tipo</dt><dd>{{ "A pagar" if titulo.tipo == "pagar" else "A receber" }}</dd>
+  <dt>Vencimento</dt><dd>{{ titulo.vencimento.strftime("%d/%m/%Y") }}</dd>
+  <dt>Valor</dt><dd>{{ "%.2f"|format(titulo.valor) }}</dd>
+  <dt>Saldo</dt><dd data-campo="saldo">{{ "%.2f"|format(titulo.saldo) }}</dd>
+  <dt>Status</dt><dd data-campo="status">{{ titulo.status }}</dd>
+</dl>
+
+<form method="post" class="formulario">
+  <label for="valor">Valor da baixa</label>
+  <input id="valor" name="valor" inputmode="decimal" placeholder="0,00">
+
+  <label for="data_pagamento">Data do pagamento</label>
+  <input id="data_pagamento" name="data_pagamento" type="date" value="{{ hoje }}">
+
+  <button type="submit">Registrar baixa</button>
+</form>
+
+<h2>Baixas registradas</h2>
+{% if baixas %}
+<table>
+  <thead><tr><th>Data</th><th class="num">Valor</th><th class="num">Encargos</th></tr></thead>
+  <tbody>
+    {% for b in baixas %}
+    <tr>
+      <td>{{ b.data_baixa.strftime("%d/%m/%Y") }}</td>
+      <td class="num">{{ "%.2f"|format(b.valor) }}</td>
+      <td class="num">{{ "%.2f"|format(b.encargos) }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>Nenhuma baixa registrada.</p>
+{% endif %}
+{% endblock %}
