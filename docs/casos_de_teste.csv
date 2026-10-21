@@ -1,0 +1,16 @@
+ID;Regra;Pré-condição;Passos;Resultado esperado;Resultado obtido;Passou?
+CT01;5;Nenhuma;Calcular o próximo dia útil de 10/10/2026 (sábado);12/10/2026;12/10/2026;Sim
+CT02;1;Nenhuma;Cadastrar título a pagar "Valor zero", valor 0, vencimento 10/11/2026, 1 parcela;Mensagem de erro; título não é cadastrado;Título cadastrado com valor 0,00 e status aberto;Não (DEFEITO 1)
+CT03;1;Nenhuma;Cadastrar título a pagar "Valor negativo", valor -50, vencimento 10/11/2026, 1 parcela;Mensagem de erro; título não é cadastrado;Título cadastrado com valor -50,00;Não (DEFEITO 1)
+CT04;1;Nenhuma;Cadastrar título a pagar com descrição só com espaços, valor 10, vencimento 10/11/2026;Mensagem "A descrição é obrigatória."; título não é cadastrado;Mensagem de erro (HTTP 400); título não cadastrado;Sim
+CT05;6;Nenhuma;Cadastrar título com valor 100, vencimento 10/11/2026, 0 parcelas;Mensagem de erro; título não é cadastrado;Mensagem de erro (HTTP 400); título não cadastrado;Sim
+CT06;6;Nenhuma;Cadastrar título a receber "Parcelado", valor 100,00, vencimento 10/11/2026, 3 parcelas;Parcelas 33,34 + 33,33 + 33,33 (soma 100,00), vencendo em 10/11/2026, 10/12/2026 e 09/01/2027;Parcelas 33,33 + 33,33 + 33,33 (soma 99,99); vencimentos corretos;Não (DEFEITO 2)
+CT07;4;Título de 1.000,00 com vencimento 10/11/2026 (terça), aberto;Registrar baixa de 1.000,00 com pagamento em 10/11/2026;Encargos 0,00;Encargos 20,00;Não (DEFEITO 3)
+CT08;4;Título de 1.000,00 com vencimento 10/11/2026 (terça), aberto;Registrar baixa de 1.000,00 com pagamento em 11/11/2026;Encargos 20,33;Encargos 20,33;Sim
+CT09;4;Título de 1.000,00 com vencimento 10/11/2026 (terça), aberto;Registrar baixa de 1.000,00 com pagamento em 10/12/2026;Encargos 29,90;Encargos 29,90;Sim
+CT10;4 e 5;Título de 1.000,00 com vencimento 10/10/2026 (sábado), aberto;Registrar baixa de 1.000,00 com pagamento em 12/10/2026 (segunda, data prorrogada);Encargos 0,00;Encargos 20,00;Não (DEFEITO 3)
+CT11;2 e 3;Título de 1.000,00 com vencimento 10/11/2026, aberto;Registrar baixa de 400,00 com pagamento em 05/11/2026;Baixa aceita; status parcial; saldo 600,00;Status parcial; saldo 600,00;Sim
+CT12;3;Título de CT11 (saldo 600,00, parcial);Registrar baixa de 700,00 com pagamento em 05/11/2026;Mensagem de erro; baixa não é registrada;Baixa registrada; saldo -100,00; status continua parcial;Não (DEFEITO 4)
+CT13;3;Título de 100,00, aberto;Registrar baixa de 0,00;Mensagem "O valor da baixa deve ser maior que zero."; baixa não é registrada;Baixa não registrada;Sim
+CT14;3;Título de 100,00 quitado (uma baixa de 100,00);Registrar baixa de 10,00;Mensagem de erro; baixa não é registrada;Baixa não registrada; status quitado;Sim
+CT15;3;Título de 100,00 cancelado pelo botão Cancelar;Registrar baixa de 50,00 com pagamento em 05/11/2026;Mensagem de erro; baixa não é registrada;Baixa registrada; status muda de cancelado para parcial;Não (DEFEITO 5)
