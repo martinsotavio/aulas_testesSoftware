@@ -114,7 +114,7 @@ def test_parcelas_com_resto_na_primeira(valor, quantidade, esperado):
 def test_soma_das_parcelas_e_exatamente_o_valor_original():
     parcelas = gerar_parcelas(Decimal("1000.00"), 7)
 
-    assert sum(parcelas) == Decimal("999.00")
+    assert sum(parcelas) == Decimal("1000.00")
 
 
 @pytest.mark.parametrize("quantidade", [0, -1])
