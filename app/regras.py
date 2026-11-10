@@ -41,8 +41,9 @@ def gerar_parcelas(valor: Decimal, quantidade: int) -> list[Decimal]:
     if quantidade < 1:
         raise RegraVioladaError("A quantidade de parcelas deve ser pelo menos 1.")
     parcela = (valor / quantidade).quantize(CENTAVO, rounding=ROUND_DOWN)
-    resto = valor - parcela * quantidade
-    return [parcela + resto] + [parcela] * (quantidade - 1)
+    parcelas = [parcela] * quantidade
+    parcelas[0] += valor - parcela * quantidade
+    return parcelas
 
 
 def vencimentos_das_parcelas(primeiro_vencimento: date, quantidade: int) -> list[date]:
@@ -67,7 +68,7 @@ def validar_baixa(saldo: Decimal, status: str, valor: Decimal) -> None:
     if valor <= 0:
         raise RegraVioladaError("O valor da baixa deve ser maior que zero.")
     if valor > saldo:
-        raise RegraVioladaError("O valor da baixa não pode ser maior que o saldo.")
+        raise RegraVioladaError("O valor da baixa não pode ser maior que o saldo do título.")
 
 
 def novo_status(valor_do_titulo: Decimal, saldo_restante: Decimal) -> str:

@@ -1,19 +1,73 @@
-"""Aplicação web (Flask): telas de títulos e de baixa."""
-from datetime import date
+"""Aplicação web (Flask): login, títulos, baixa e fluxo de caixa, mais a API em /api."""
+import os
+from datetime import timedelta
 
-from flask import Flask, flash, redirect, render_template, request, url_for
+from flask import Flask, flash, redirect, render_template, request, session, url_for
 
 from app import regras
+from app.api import criar_api
 from app.config import DATABASE_URL
 from app.formularios import ler_data, ler_inteiro, ler_valor
 from app.regras import RegraVioladaError
 from app.repositorio import RepositorioPostgres
+from app.servicos import (
+    NotificadorLog,
+    RelogioSistema,
+    ServicoBaixa,
+    TituloNaoEncontradoError,
+)
+
+USUARIO = os.environ.get("USUARIO", "admin")
+SENHA = os.environ.get("SENHA", "admin123")
+ROTAS_SEM_LOGIN = ("login", "entrar", "static")
 
 
-def criar_app(database_url: str = DATABASE_URL) -> Flask:
+def criar_app(database_url: str = DATABASE_URL, relogio=None) -> Flask:
     app = Flask(__name__)
     app.secret_key = "chave-apenas-para-aula"
     repositorio = RepositorioPostgres(database_url)
+    relogio = relogio or RelogioSistema()
+    servico_baixa = ServicoBaixa(repositorio, relogio, NotificadorLog())
+    app.register_blueprint(criar_api(repositorio, servico_baixa))
+
+    @app.before_request
+    def exigir_login():
+        rota = request.endpoint or ""
+        if rota in ROTAS_SEM_LOGIN or rota.startswith("api."):
+            return None
+        if not session.get("usuario"):
+            return redirect(url_for("login"))
+        return None
+
+    @app.get("/login")
+    def login():
+        return render_template("login.html")
+
+    @app.post("/login")
+    def entrar():
+        if request.form.get("usuario") == USUARIO and request.form.get("senha") == SENHA:
+            session["usuario"] = USUARIO
+            return redirect(url_for("listar_titulos"))
+        flash("Usuário ou senha inválidos.", "erro")
+        return render_template("login.html"), 401
+
+    @app.post("/sair")
+    def sair():
+        session.clear()
+        return redirect(url_for("login"))
+
+    @app.get("/fluxo-caixa")
+    def fluxo_caixa():
+        hoje = relogio.hoje()
+        try:
+            inicio = ler_data(request.args.get("inicio") or hoje.replace(day=1).isoformat())
+            fim = ler_data(request.args.get("fim") or (inicio + timedelta(days=30)).isoformat())
+        except RegraVioladaError as erro:
+            flash(str(erro), "erro")
+            return redirect(url_for("fluxo_caixa"))
+        return render_template(
+            "fluxo.html", inicio=inicio, fim=fim, saldo=repositorio.fluxo_caixa(inicio, fim)
+        )
 
     @app.get("/")
     def listar_titulos():
@@ -56,28 +110,23 @@ def criar_app(database_url: str = DATABASE_URL) -> Flask:
             return redirect(url_for("listar_titulos"))
         return render_template(
             "baixa.html", titulo=titulo, baixas=repositorio.listar_baixas(titulo_id),
-            hoje=date.today().isoformat(),
+            hoje=relogio.hoje().isoformat(),
         )
 
     @app.post("/titulos/<int:titulo_id>/baixa")
     def registrar_baixa(titulo_id):
-        titulo = repositorio.buscar_titulo(titulo_id)
-        if titulo is None:
-            flash("Título não encontrado.", "erro")
-            return redirect(url_for("listar_titulos"))
         try:
             valor = ler_valor(request.form.get("valor"))
             pagamento = ler_data(request.form.get("data_pagamento"))
-            regras.validar_baixa(titulo["saldo"], titulo["status"], valor)
+            resultado = servico_baixa.baixar(titulo_id, valor, pagamento)
+        except TituloNaoEncontradoError:
+            flash("Título não encontrado.", "erro")
+            return redirect(url_for("listar_titulos"))
         except RegraVioladaError as erro:
             flash(str(erro), "erro")
             return redirect(url_for("formulario_baixa", titulo_id=titulo_id))
 
-        encargos = regras.calcular_encargos(valor, titulo["vencimento"], pagamento)
-        repositorio.registrar_baixa(titulo_id, valor, encargos, pagamento)
-        status = regras.novo_status(titulo["valor"], titulo["saldo"] - valor)
-        repositorio.atualizar_status(titulo_id, status)
-        flash(f"Baixa registrada. Encargos por atraso: R$ {encargos:.2f}.", "sucesso")
+        flash(f"Baixa registrada. Encargos por atraso: R$ {resultado.encargos:.2f}.", "sucesso")
         return redirect(url_for("formulario_baixa", titulo_id=titulo_id))
 
     @app.post("/titulos/<int:titulo_id>/cancelar")
